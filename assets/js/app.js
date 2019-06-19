@@ -62,7 +62,7 @@ function makeResponsive() {
 
             var yScale = d3.scaleLinear()
                 .domain(d3.extent(stateData, d => d.healthcare))
-                .range([chartHeight, 0])
+                .range([chartHeight, 0]);
             // Scale x to width
 
             var xScale = d3.scaleLinear()
@@ -85,7 +85,7 @@ function makeResponsive() {
                 .enter()
                 .append("circle")
                 .attr("cx", d =>xScale(d.poverty))
-                .attr("cy", d =>xScale(d.healthcare))
+                .attr("cy", d =>yScale(d.healthcare))
                 .attr("r", "10")
                 .attr("fill", "gray")
                 .attr("stroke-width", "1")
