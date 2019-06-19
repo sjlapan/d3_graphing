@@ -8,8 +8,8 @@ function makeResponsive() {
         svgArea.remove();
     }
     // svg container
-    var svgHeight = window.innerHeight;
-    var svgWidth = window.innerWidth;
+    var svgHeight = 460;
+    var svgWidth = 660;
 
     // margins
 
@@ -61,23 +61,45 @@ function makeResponsive() {
             // Scale y to height
 
             var yScale = d3.scaleLinear()
-                .domain()
-                .range()
+                .domain(d3.extent(stateData, d => d.healthcare))
+                .range([chartHeight, 0])
             // Scale x to width
 
             var xScale = d3.scaleLinear()
-                .domain()
-                .range()
+                .domain([0, d3.max(stateData, d => d.poverty)])
+                .range([0, chartWidth])
             // Create axes
             var yAxis = d3.axisLeft(yScale);
             var xAxis = d3.axisBottom(xScale);
+
+            // Transform x axis to place it at the bottom of the chart
+            chartGroup.append("g")
+                .attr("transform", `translate(0, ${chartHeight})`)
+                .call(xAxis);
+            // Apply the y axis
+            chartGroup.append("g")
+                .call(yAxis);
+            // Append data to chartGroup
+            var circlesGroup = chartGroup.selectAll("circle")
+                .data(stateData)
+                .enter()
+                .append("circle")
+                .attr("cx", d =>xScale(d.poverty))
+                .attr("cy", d =>xScale(d.healthcare))
+                .attr("r", "10")
+                .attr("fill", "gray")
+                .attr("stroke-width", "1")
+                .attr("stroke", "black");
 
         });
 
 
 
 }
+makeResponsive();
 
+// Respond to resizing of window
+d3.select(window).on("resize", makeResponsive);
 
 
 
