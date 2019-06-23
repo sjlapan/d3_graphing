@@ -57,16 +57,16 @@ function makeResponsive() {
 
             });
             console.log(stateData)
-
+            
             // Scale y to height
 
             var yScale = d3.scaleLinear()
-                .domain(d3.extent(stateData, d => d.healthcare))
+                .domain([d3.min(stateData, d => d.healthcare)-1,d3.max(stateData, d => d.healthcare)])
                 .range([chartHeight, 0]);
             // Scale x to width
 
             var xScale = d3.scaleLinear()
-                .domain([0, d3.max(stateData, d => d.poverty)])
+                .domain([(d3.min(stateData, d => d.poverty))-1, d3.max(stateData, d => d.poverty)])
                 .range([0, chartWidth])
             // Create axes
             var yAxis = d3.axisLeft(yScale);
@@ -79,7 +79,16 @@ function makeResponsive() {
             // Apply the y axis
             chartGroup.append("g")
                 .call(yAxis);
-            // Append data to chartGroup
+
+            // Create tooltip info for each point
+            var toolTip = d3.tip()
+                .attr("class", "d3-tip")
+                .offset([80, -60])
+                .html(function(d) {
+                    return(`<strong>${d.abbr}</strong>
+                    ${d.poverty}, ${d.healthcare}`);
+                })
+           // Append data to chartGroup
             var circlesGroup = chartGroup.selectAll("circle")
                 .data(stateData)
                 .enter()
@@ -87,10 +96,42 @@ function makeResponsive() {
                 .attr("cx", d =>xScale(d.poverty))
                 .attr("cy", d =>yScale(d.healthcare))
                 .attr("r", "10")
-                .attr("fill", "gray")
+                .attr("fill", "rgb(12,240,233)")
+                .attr("opacity", "0.5")
                 .attr("stroke-width", "1")
-                .attr("stroke", "black");
+                .attr("stroke", "black")
+                .on("mouseover", toolTip.show)
+                .on("mouseout", toolTip.hide)
+                
 
+
+                // Still need to add state abbr to each point
+            var textGroup = chartGroup.selectAll("text.circle-text")
+                .data(stateData)
+                .enter()
+                .append("text")
+                .classed("circle-text", true)
+                .attr("x", d =>xScale(d.poverty))
+                .attr("y", d =>yScale(d.healthcare))
+                .attr("text-anchor", "middle")
+                .attr("fill", "gray")
+                .attr("font-size", "10px")
+                .text(d=>d.abbr);
+            
+                circlesGroup.call(toolTip);
+            // Append axis labels
+            chartGroup.append("text")
+                .attr("transform", `translate(${chartWidth/2}, ${chartHeight + 20})`)
+                .attr("x", 0)
+                .attr("y", 20)
+                .classed("axis-text", true)
+                .text("In Poverty (%)");
+            chartGroup.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -30)
+                .attr("x", 0-(chartHeight/2) -80)
+                .classed("axis-text", true)
+                .text("Lacks Healthcare (%)");
         });
 
 
